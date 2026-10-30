@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Template for manual install: __HOME__ is replaced with your home folder (see README). -->
+<plist version="1.0"><dict>
+  <key>Label</key><string>local.focus-follows-mouse</string>
+  <key>ProgramArguments</key><array><string>__HOME__/Library/Application Support/focus-follows-mouse/focus-follows-mouse</string></array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/tmp/focus-follows-mouse.log</string>
+  <key>StandardErrorPath</key><string>/tmp/focus-follows-mouse.log</string>
+</dict></plist>
