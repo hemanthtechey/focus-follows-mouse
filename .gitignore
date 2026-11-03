@@ -1,2 +1,6 @@
 build/
 .DS_Store
+*.app
+# private project record, not for the public repo
+Focus-Follows-Mouse.md
+Focus-Follows-Mouse.html

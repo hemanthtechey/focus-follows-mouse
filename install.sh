@@ -1,17 +1,20 @@
 #!/bin/bash
-# Installs focus-follows-mouse as a login agent.  Uninstall: ./install.sh --uninstall
+# Builds Focus Follows Mouse.app from source and installs it in /Applications.  Uninstall: ./install.sh --uninstall
 set -euo pipefail
 
-LABEL=local.focus-follows-mouse
-DIR="$HOME/Library/Application Support/focus-follows-mouse"
-PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
-SRC_URL=https://raw.githubusercontent.com/hemanthtechey/focus-follows-mouse/main/focus.swift
+APP="Focus Follows Mouse.app"
+ID=local.focus-follows-mouse
+BASE=https://raw.githubusercontent.com/hemanthtechey/focus-follows-mouse/main
 
-launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
+# Remove the older LaunchAgent-based version so two copies never run at once.
+launchctl bootout "gui/$(id -u)/$ID" 2>/dev/null || true
+rm -rf "$HOME/Library/LaunchAgents/$ID.plist" "$HOME/Library/Application Support/focus-follows-mouse"
 
 if [ "${1:-}" = "--uninstall" ]; then
-  rm -rf "$DIR" "$PLIST"
-  echo "Removed. Also remove 'focus-follows-mouse' from System Settings → Privacy & Security → Accessibility."
+  pkill -x FocusFollowsMouse || true
+  rm -rf "/Applications/$APP"
+  tccutil reset Accessibility "$ID" >/dev/null 2>&1 || true
+  echo "Removed Focus Follows Mouse."
   exit 0
 fi
 
@@ -21,28 +24,12 @@ if ! xcode-select -p >/dev/null 2>&1; then
   exit 1
 fi
 
-mkdir -p "$DIR" "$HOME/Library/LaunchAgents"
-# Works from a clone (uses the local file) or via curl | bash (downloads it).
+# Use the files next to this script when run from a clone; otherwise download them.
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || true)"
-if [ -f "$HERE/focus.swift" ]; then cp "$HERE/focus.swift" "$DIR/"; else curl -fsSL "$SRC_URL" -o "$DIR/focus.swift"; fi
-
-echo "Building…"
-swiftc -O "$DIR/focus.swift" -o "$DIR/focus-follows-mouse"
-
-sed "s|__HOME__|$HOME|" > "$PLIST" <<'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-  <key>Label</key><string>local.focus-follows-mouse</string>
-  <key>ProgramArguments</key><array><string>__HOME__/Library/Application Support/focus-follows-mouse/focus-follows-mouse</string></array>
-  <key>RunAtLoad</key><true/>
-  <key>KeepAlive</key><true/>
-  <key>StandardOutPath</key><string>/tmp/focus-follows-mouse.log</string>
-  <key>StandardErrorPath</key><string>/tmp/focus-follows-mouse.log</string>
-</dict></plist>
-EOF
-launchctl bootstrap "gui/$(id -u)" "$PLIST"
-
-open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
-echo "Installed. Last step: turn on 'focus-follows-mouse' in the Accessibility list that just opened."
-echo "Then rest the pointer on any window — it gets focus without a click."
+if [ -n "$HERE" ] && [ -f "$HERE/focus.swift" ] && [ -f "$HERE/build.sh" ]; then
+  SRC="$HERE"
+else
+  SRC="$(mktemp -d)"; trap 'rm -rf "$SRC"' EXIT
+  for f in focus.swift make-icon.swift build.sh; do curl -fsSL "$BASE/$f" -o "$SRC/$f"; done
+fi
+sh "$SRC/build.sh" --install
