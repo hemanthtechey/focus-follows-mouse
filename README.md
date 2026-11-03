@@ -8,7 +8,8 @@ A small, dependency-free menu bar app for macOS, replacing AutoRaise-style tools
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hemanthtechey/focus-follows-mouse/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/hemanthtechey/focus-follows-mouse/main/install.sh \
+  | bash
 ```
 
 1. When macOS asks, open System Settings and turn on **Focus Follows Mouse** under
@@ -57,7 +58,8 @@ It stays out of the way:
 ## Uninstall
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hemanthtechey/focus-follows-mouse/main/install.sh | bash -s -- --uninstall
+curl -fsSL https://raw.githubusercontent.com/hemanthtechey/focus-follows-mouse/main/install.sh \
+  | bash -s -- --uninstall
 ```
 
 ## Licence
